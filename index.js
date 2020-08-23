@@ -1,5 +1,6 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
+const consoleTable = require("console.table");
 const connection = mysql.createConnection({
     host: 'localhost',
     port: '3306',
@@ -31,7 +32,6 @@ function start() {
             "Exit"
         ]
     }).then(function (answer) {
-        console.log("answer: ", answer);
         // Regret making all of these choices
         switch (answer.menu) {
             // Because each of these choices needs its own function why have I done this
@@ -81,16 +81,11 @@ function start() {
 // And here comes all of the functions
 
 function addEmp() {
-    console.log("addEmp function")
     // Create an array of roles to choose from using a for loop
     let rolesArray = [];
-    let rolesQuery = "SELECT * FROM roles";
+    let rolesQuery = "SELECT * FROM role";
 
     connection.query(rolesQuery, function (err, res) {
-        if(err) {
-            console.log("addEmployee err: ", err);
-        }
-        console.log("addEmp res:::: ", res);
         for (let i = 0; i < res.length; i++) {
             rolesArray.push(res[i].title);
         };
@@ -114,7 +109,7 @@ function addEmp() {
             }
         ]).then(function (answer) {
             // And then insert that information back into the db
-            let EmpQuery = "INSERT INTO employees SET ?";
+            let EmpQuery = "INSERT INTO employee SET ?";
             connection.query(
                 EmpQuery,
                 {
@@ -139,7 +134,7 @@ function removeEmp() {
     // At this point, these notes are purely in case I forget how MySQL works because I just spent like 14 consecutive hours learning it
     // I did not sleep
     let empArray = [];
-    let empQuery = "SELECT employees.first_name, employees.last_name FROM employees";
+    let empQuery = "SELECT employee.first_name, employee.last_name FROM employee";
 
     connection.query(empQuery, function (err, res) {
         for (let i = 0; i < res.length; i++) {
@@ -155,7 +150,7 @@ function removeEmp() {
                 message: "Pick an employee to... dispose of"
             },
         ]).then(function (res) {
-            let empQuery = "DELETE FROM employees WHERE CONCAT(first_name, ' ', last_name) = '${res.removeEmployee}'";
+            let empQuery = "DELETE FROM employee WHERE CONCAT(first_name, ' ', last_name) = '${res.removeEmployee}'";
             connection.query(empQuery, function (err, res) {
                 if (err) throw err;
                 console.log("Employee has been removed from the system.");
@@ -172,7 +167,7 @@ function updateEmpRole() {
     // This is the most excitement I've seen in hours
     let empArray = [];
     let rolesArray = [];
-    let rolesQuery = "SELECT first_name, last_name from employees, SELECT title FROM roles";
+    let rolesQuery = "SELECT first_name, last_name from employee, SELECT title FROM role";
     // Reuse empArray from "Remove Employee"
     connection.query(empQuery, function (err, res) {
         for (let i = 0; i < res.length; i++) {
@@ -198,7 +193,7 @@ function updateEmpRole() {
                     message: "And what should their new role be?"
                 }
             ]).then(function (answer) {
-                let empRoleQuery = "UPDATE employees SET role_id = (SELECT id FROM roles WHERE title = ?) WHERE id = (SELECT id FROM(SELECT id FROM employees WHERE CONCAT(first_name, ' ',last_name) = ?))";
+                let empRoleQuery = "UPDATE employee SET role_id = (SELECT id FROM role WHERE title = ?) WHERE id = (SELECT id FROM(SELECT id FROM employee WHERE CONCAT(first_name, ' ',last_name) = ?))";
                 connection.query(empRoleQuery, [answer.rolesArray, answer.employee], function (err, res) {
                     if (err) throw err;
                 });
@@ -256,7 +251,7 @@ function addRole() {
                 message: "What department should this role work in?"
             }
         ]).then(function (answer) {
-            let roleQuery = "INSERT INTO roles SET ?";
+            let roleQuery = "INSERT INTO role SET ?";
             connection.query(roleQuery, { title: answer.newTitle, salary: answer.newSalary, department_id: answer.deptList }, function (err, res) {
                 if (err) throw err;
                 console.table(res)
@@ -270,11 +265,12 @@ function addRole() {
 
 function viewEmp() {
     // Just going to select everything and display it here
-    let viewEmpQuery = "SELECT * FROM employees"
+    let viewEmpQuery = "SELECT * FROM employee"
 
     connection.query(viewEmpQuery, function (err, res) {
         if (err) throw err;
         console.table("Current employees: ", res);
+        console.table(res);
         // Return to menu
         start();
     });
@@ -292,11 +288,11 @@ function viewDepts() {
 };
 
 function viewRoles() {
-    var roleQuery = "SELECT * FROM roles";
+    var roleQuery = "SELECT * FROM role";
 
     connection.query(roleQuery, function (err, res) {
         if (err) throw err;
-        console.table("Current roles: ", res);
+        console.table("Current role: ", res);
     });
     // Return to menu
     start();
@@ -314,7 +310,7 @@ function nahLol() {
             name: "lol",
             type: "list",
             message: "Good. Didn't think so.",
-            choices: ["Okay..."]
+            choices: ["Okay...", "Wow"]
         }
     ]);
     // Return to menu
