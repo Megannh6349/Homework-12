@@ -5,12 +5,12 @@ const connection = mysql.createConnection({
     port: '3306',
     user: 'root',
     password: 'rootpass',
-    database: 'CMS_db'
+    database: 'cms_db'
 });
 
-connection.connect(function (err) {
-    if (err) throw err;
-});
+// connection.connect(function (err) {
+//     if (err) throw err;
+// });
 
 // CLI Logic
 function start() {
@@ -31,6 +31,7 @@ function start() {
             "Exit"
         ]
     }).then(function (answer) {
+        console.log("answer: ", answer);
         // Regret making all of these choices
         switch (answer.menu) {
             // Because each of these choices needs its own function why have I done this
@@ -80,11 +81,16 @@ function start() {
 // And here comes all of the functions
 
 function addEmp() {
+    console.log("addEmp function")
     // Create an array of roles to choose from using a for loop
     let rolesArray = [];
     let rolesQuery = "SELECT * FROM roles";
 
     connection.query(rolesQuery, function (err, res) {
+        if(err) {
+            console.log("addEmployee err: ", err);
+        }
+        console.log("addEmp res:::: ", res);
         for (let i = 0; i < res.length; i++) {
             rolesArray.push(res[i].title);
         };
@@ -314,3 +320,5 @@ function nahLol() {
     // Return to menu
     start();
 };
+
+start();
