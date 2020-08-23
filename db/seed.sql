@@ -1,5 +1,5 @@
 
-USE CMS_db;
+USE cms_db;
 
 INSERT INTO department (name) VALUES ("HR");
 INSERT INTO department (name) VALUES ("Sales");
